@@ -14,6 +14,8 @@ fi
 docker=/data/docker/src/github.com/dotcloud/docker
 [ -d $docker ] && cd $docker
 
+export PATH=$PATH:/usr/local/go/bin
+
 export GOPATH=/data/docker
 export PATH=$PATH:$GOPATH/bin
 
