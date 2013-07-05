@@ -15,7 +15,6 @@ Vagrant::Config.run do |config|
   config.vm.box = BOX_NAME
   config.vm.box_url = BOX_URI
   config.vm.share_folder "v-data", DOCKER_PATH, "#{File.dirname(__FILE__)}/.."
-  config.vm.network :hostonly, VM_IP
   # Stop if deployment has been done
   config.vm.provision :shell, :inline => "[ ! -f /usr/bin/git ]"
   # Touch for makefile
@@ -33,4 +32,12 @@ Vagrant::Config.run do |config|
     "chown #{USER}.#{USER} /data; cd /data; " \
     "#{CFG_PATH}/setup.sh #{USER} #{GOPATH} #{DOCKER_PATH} #{CFG_PATH} #{BUILDBOT_PATH}"
   config.vm.provision :shell, :inline => pkg_cmd
+end
+
+Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|
+  config.vm.hostname = 'docker'
+  config.vm.provider "virtualbox" do |v|
+    #v.gui = true
+    v.name = 'docker'
+  end
 end
