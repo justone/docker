@@ -159,7 +159,7 @@ func (srv *Server) ImageInsert(name, url, path string, out io.Writer, sf *utils.
 func (srv *Server) ImagesTree(out io.Writer) error {
 	var (
 		roots []*Image
-		err       error
+		err   error
 	)
 
 	roots, err = srv.runtime.graph.Roots()
@@ -188,23 +188,23 @@ func WalkTree(out io.Writer, reporefs map[string][]string, byParent map[string][
 	if len(images) > 1 {
 		length := len(images)
 		for index, image := range images {
-			if (index + 1 == length) {
-				PrintTreeNode(out, reporefs, image, prefix + "└─")
+			if index+1 == length {
+				PrintTreeNode(out, reporefs, image, prefix+"└─")
 				if subimages, exists := byParent[image.ID]; exists {
-					WalkTree(out, reporefs, byParent, subimages, prefix + "  ")
+					WalkTree(out, reporefs, byParent, subimages, prefix+"  ")
 				}
 			} else {
-				PrintTreeNode(out, reporefs, image, prefix + "|─")
+				PrintTreeNode(out, reporefs, image, prefix+"|─")
 				if subimages, exists := byParent[image.ID]; exists {
-					WalkTree(out, reporefs, byParent, subimages, prefix + "| ")
+					WalkTree(out, reporefs, byParent, subimages, prefix+"| ")
 				}
 			}
 		}
 	} else {
 		for _, image := range images {
-			PrintTreeNode(out, reporefs, image, prefix + "└─")
+			PrintTreeNode(out, reporefs, image, prefix+"└─")
 			if subimages, exists := byParent[image.ID]; exists {
-				WalkTree(out, reporefs, byParent, subimages, prefix + "  ")
+				WalkTree(out, reporefs, byParent, subimages, prefix+"  ")
 			}
 		}
 	}
