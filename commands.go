@@ -937,6 +937,7 @@ func (cli *DockerCli) CmdImages(args ...string) error {
 	all := cmd.Bool("a", false, "show all images")
 	noTrunc := cmd.Bool("notrunc", false, "Don't truncate output")
 	flViz := cmd.Bool("viz", false, "output graph in graphviz format")
+	flTree := cmd.Bool("tree", false, "output graph in tree format")
 
 	if err := cmd.Parse(args); err != nil {
 		return nil
@@ -948,6 +949,12 @@ func (cli *DockerCli) CmdImages(args ...string) error {
 
 	if *flViz {
 		body, _, err := cli.call("GET", "/images/viz", false)
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(cli.out, "%s", body)
+	} else if *flTree {
+		body, _, err := cli.call("GET", "/images/tree", false)
 		if err != nil {
 			return err
 		}

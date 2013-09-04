@@ -322,6 +322,19 @@ func (graph *Graph) ByParent() (map[string][]*Image, error) {
 	return byParent, err
 }
 
+// Roots returns all roots in the graph
+// A root is an image with has no parents
+func (graph *Graph) Roots() ([]*Image, error) {
+	var roots []*Image
+	err := graph.WalkAll(func(image *Image) {
+		parent, _ := image.GetParent()
+		if parent == nil {
+			roots = append(roots, image)
+		}
+	})
+	return roots, err
+}
+
 // Heads returns all heads in the graph, keyed by id.
 // A head is an image which is not the parent of another image in the graph.
 func (graph *Graph) Heads() (map[string]*Image, error) {

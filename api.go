@@ -179,6 +179,13 @@ func getImagesViz(srv *Server, version float64, w http.ResponseWriter, r *http.R
 	return nil
 }
 
+func getImagesTree(srv *Server, version float64, w http.ResponseWriter, r *http.Request, vars map[string]string) error {
+	if err := srv.ImagesTree(w); err != nil {
+		return err
+	}
+	return nil
+}
+
 func getInfo(srv *Server, version float64, w http.ResponseWriter, r *http.Request, vars map[string]string) error {
 	return writeJSON(w, http.StatusOK, srv.DockerInfo())
 }
@@ -999,6 +1006,7 @@ func createRouter(srv *Server, logging bool) (*mux.Router, error) {
 			"/version":                        getVersion,
 			"/images/json":                    getImagesJSON,
 			"/images/viz":                     getImagesViz,
+			"/images/tree":                    getImagesTree,
 			"/images/search":                  getImagesSearch,
 			"/images/{name:.*}/history":       getImagesHistory,
 			"/images/{name:.*}/json":          getImagesByName,

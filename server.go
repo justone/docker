@@ -156,6 +156,68 @@ func (srv *Server) ImageInsert(name, url, path string, out io.Writer, sf *utils.
 	return img.ShortID(), nil
 }
 
+func (srv *Server) ImagesTree(out io.Writer) error {
+	var (
+		roots []*Image
+		err       error
+	)
+
+	roots, err = srv.runtime.graph.Roots()
+	if err != nil {
+		return nil
+	}
+
+	byParent, err := srv.runtime.graph.ByParent()
+	if err != nil {
+		return err
+	}
+
+	reporefs := make(map[string][]string)
+
+	for name, repository := range srv.runtime.repositories.Repositories {
+		for tag, id := range repository {
+			reporefs[utils.TruncateID(id)] = append(reporefs[utils.TruncateID(id)], fmt.Sprintf("%s:%s", name, tag))
+		}
+	}
+
+	WalkTree(out, reporefs, byParent, roots, "")
+	return nil
+}
+
+func WalkTree(out io.Writer, reporefs map[string][]string, byParent map[string][]*Image, images []*Image, prefix string) {
+	if len(images) > 1 {
+		length := len(images)
+		for index, image := range images {
+			if (index + 1 == length) {
+				PrintTreeNode(out, reporefs, image, prefix + "└─")
+				if subimages, exists := byParent[image.ID]; exists {
+					WalkTree(out, reporefs, byParent, subimages, prefix + "  ")
+				}
+			} else {
+				PrintTreeNode(out, reporefs, image, prefix + "|─")
+				if subimages, exists := byParent[image.ID]; exists {
+					WalkTree(out, reporefs, byParent, subimages, prefix + "| ")
+				}
+			}
+		}
+	} else {
+		for _, image := range images {
+			PrintTreeNode(out, reporefs, image, prefix + "└─")
+			if subimages, exists := byParent[image.ID]; exists {
+				WalkTree(out, reporefs, byParent, subimages, prefix + "  ")
+			}
+		}
+	}
+}
+
+func PrintTreeNode(out io.Writer, reporefs map[string][]string, image *Image, prefix string) {
+	if refs, exists := reporefs[image.ShortID()]; exists {
+		out.Write([]byte(prefix + image.ShortID() + " Tags: " + strings.Join(refs, ",") + "\n"))
+	} else {
+		out.Write([]byte(prefix + image.ShortID() + "\n"))
+	}
+}
+
 func (srv *Server) ImagesViz(out io.Writer) error {
 	images, _ := srv.runtime.graph.Map()
 	if images == nil {
