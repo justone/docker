@@ -180,7 +180,13 @@ func getImagesViz(srv *Server, version float64, w http.ResponseWriter, r *http.R
 }
 
 func getImagesTree(srv *Server, version float64, w http.ResponseWriter, r *http.Request, vars map[string]string) error {
-	if err := srv.ImagesTree(w); err != nil {
+	if err := parseForm(r); err != nil {
+		return err
+	}
+
+	image := r.Form.Get("image")
+
+	if err := srv.ImagesTree(w, image); err != nil {
 		return err
 	}
 	return nil

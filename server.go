@@ -156,15 +156,23 @@ func (srv *Server) ImageInsert(name, url, path string, out io.Writer, sf *utils.
 	return img.ShortID(), nil
 }
 
-func (srv *Server) ImagesTree(out io.Writer) error {
+func (srv *Server) ImagesTree(out io.Writer, startImage string) error {
 	var (
 		roots []*Image
 		err   error
 	)
 
-	roots, err = srv.runtime.graph.Roots()
-	if err != nil {
-		return nil
+	if startImage != "" {
+		img, err := srv.runtime.repositories.LookupImage(startImage)
+		if err != nil {
+			return fmt.Errorf("No such image: %s", startImage)
+		}
+		roots = []*Image{img}
+	} else {
+		roots, err = srv.runtime.graph.Roots()
+		if err != nil {
+			return nil
+		}
 	}
 
 	byParent, err := srv.runtime.graph.ByParent()

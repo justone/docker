@@ -954,7 +954,12 @@ func (cli *DockerCli) CmdImages(args ...string) error {
 		}
 		fmt.Fprintf(cli.out, "%s", body)
 	} else if *flTree {
-		body, _, err := cli.call("GET", "/images/tree", false)
+		v := url.Values{}
+
+		image := cmd.Arg(0)
+		v.Set("image", image)
+
+		body, _, err := cli.call("GET", "/images/tree?"+v.Encode(), false)
 		if err != nil {
 			return err
 		}
