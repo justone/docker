@@ -1135,6 +1135,7 @@ func (cli *DockerCli) CmdPull(args ...string) error {
 
 func (cli *DockerCli) CmdImages(args ...string) error {
 	cmd := cli.Subcmd("images", "[OPTIONS] [NAME]", "List images")
+	debug := cmd.Bool([]string{"#debug", "-debug"}, false, "Dump image JSON")
 	quiet := cmd.Bool([]string{"q", "-quiet"}, false, "Only show numeric IDs")
 	all := cmd.Bool([]string{"a", "-all"}, false, "Show all images (by default filter out the intermediate image layers)")
 	noTrunc := cmd.Bool([]string{"#notrunc", "-no-trunc"}, false, "Don't truncate output")
@@ -1147,6 +1148,16 @@ func (cli *DockerCli) CmdImages(args ...string) error {
 	}
 	if cmd.NArg() > 1 {
 		cmd.Usage()
+		return nil
+	}
+
+	if *debug {
+		body, _, err := readBody(cli.call("GET", "/images/json?all=1", nil, false))
+		if err != nil {
+			return err
+		}
+
+		fmt.Println(string(body))
 		return nil
 	}
 
@@ -1333,6 +1344,7 @@ func (cli *DockerCli) printTreeNode(noTrunc bool, image *engine.Env, prefix stri
 
 func (cli *DockerCli) CmdPs(args ...string) error {
 	cmd := cli.Subcmd("ps", "[OPTIONS]", "List containers")
+	debug := cmd.Bool([]string{"#debug", "-debug"}, false, "Dump container JSON")
 	quiet := cmd.Bool([]string{"q", "-quiet"}, false, "Only display numeric IDs")
 	size := cmd.Bool([]string{"s", "-size"}, false, "Display sizes")
 	all := cmd.Bool([]string{"a", "-all"}, false, "Show all containers. Only running containers are shown by default.")
@@ -1363,6 +1375,16 @@ func (cli *DockerCli) CmdPs(args ...string) error {
 	}
 	if *size {
 		v.Set("size", "1")
+	}
+
+	if *debug {
+		body, _, err := readBody(cli.call("GET", "/containers/json?all=1", nil, false))
+		if err != nil {
+			return err
+		}
+
+		fmt.Println(string(body))
+		return nil
 	}
 
 	body, _, err := readBody(cli.call("GET", "/containers/json?"+v.Encode(), nil, false))
